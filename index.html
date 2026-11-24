@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雅思备考工作台</title>
+<style>
+:root{
+  --primary:#4361ee; --primary-soft:#eef1fe;
+  --sidebar:#1d2a52; --sidebar2:#2a3a6b;
+  --bg:#f4f6fb; --card:#ffffff; --line:#e6eaf2;
+  --text:#23283a; --muted:#7a8199;
+  --green:#22c55e; --blue:#3b82f6; --amber:#f59e0b; --red:#ef4444; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+/* ===== 侧边栏 ===== */
+.sidebar{width:224px;flex:0 0 224px;background:linear-gradient(180deg,var(--sidebar),var(--sidebar2));color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20}
+.logo{padding:22px 18px;font-size:19px;font-weight:700;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.12)}
+.logo small{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,.55);margin-top:4px}
+.sidebar nav{flex:1;padding:14px 10px;overflow-y:auto}
+.sidebar nav a{display:flex;align-items:center;gap:10px;padding:11px 14px;margin:3px 0;border-radius:10px;color:rgba(255,255,255,.82);text-decoration:none;font-size:14px;cursor:pointer;transition:.15s}
+.sidebar nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar nav a.active{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(67,97,238,.4)}
+.sidebar nav a .ico{font-size:17px;width:22px;text-align:center}
+.sidebar-foot{padding:14px 18px;font-size:11px;color:rgba(255,255,255,.5);border-top:1px solid rgba(255,255,255,.12)}
+/* ===== 主区域 ===== */
+main{flex:1;margin-left:224px;padding:26px 30px 60px;max-width:1180px}
+section{display:none}
+section.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-head{margin-bottom:20px}
+.page-head h1{font-size:24px;font-weight:700}
+.page-head p{color:var(--muted);font-size:13px;margin-top:6px}
+/* ===== 卡片 ===== */
+.grid{display:grid;gap:16px}
+.cols-4{grid-template-columns:repeat(4,1fr)}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+.cols-2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(30,40,70,.04)}
+.card h3{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.stat{padding:16px 18px;border-radius:12px;color:#fff;position:relative;overflow:hidden}
+.stat .num{font-size:26px;font-weight:800;line-height:1.2}
+.stat .lbl{font-size:12px;opacity:.9;margin-top:4px}
+.s-blue{background:linear-gradient(135deg,#4361ee,#6a85f5)}
+.s-green{background:linear-gradient(135deg,#16a34a,#34d399)}
+.s-amber{background:linear-gradient(135deg,#d97706,#fbbf24)}
+.s-red{background:linear-gradient(135deg,#dc2626,#f87171)}
+.s-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.s-teal{background:linear-gradient(135deg,#0d9488,#2dd4bf)}
+/* ===== 表格 ===== */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line)}
+th{background:#f7f9fd;color:var(--muted);font-weight:600;position:sticky;top:0}
+tr:hover td{background:#fafbff}
+.table-wrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}
+input[type=number],input[type=text],input[type=date],select,textarea{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--primary-soft);border-color:var(--primary)}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.b-phase1{background:#dcfce7;color:#15803d}
+.b-phase2{background:#dbeafe;color:#1d4ed8}
+.b-phase3{background:#fef3c7;color:#b45309}
+.b-l{background:#dbeafe;color:#1d4ed8}.b-r{background:#dcfce7;color:#15803d}.b-w{background:#ffedd5;color:#c2410c}.b-s{background:#fee2e2;color:#b91c1c}.b-v{background:#ede9fe;color:#6d28d9}.b-g{background:#e2e8f0;color:#475569}
+/* ===== 计划文档 ===== */
+.doc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:34px 40px;line-height:1.75;font-size:14.5px}
+.doc h2{font-size:19px;margin:26px 0 10px;padding-left:10px;border-left:4px solid var(--primary)}
+.doc h2:first-child{margin-top:0}
+.doc h3{font-size:16px;margin:18px 0 8px;color:#31406e}
+.doc ul{margin:6px 0 10px 4px;list-style:none}
+.doc li{padding:4px 0 4px 20px;position:relative}
+.doc li::before{content:"";position:absolute;left:2px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--primary)}
+.doc .warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;color:#9a3412;margin:14px 0;font-size:13.5px}
+.doc .tip{background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:12px 16px;color:#3730a3;margin:14px 0;font-size:13.5px}
+/* ===== 按钮 ===== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.btn:hover{filter:brightness(1.06)}
+.btn-ghost{background:#eef1fe;color:var(--primary)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.mt{margin-top:14px}
+.muted{color:var(--muted);font-size:12px}
+.progress{height:8px;border-radius:99px;background:#eef1f6;overflow:hidden}
+.progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),#6a85f5)}
+svg text{font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+@media(max-width:900px){.sidebar{width:64px;flex-basis:64px}.sidebar nav a span.lbl,.logo small,.sidebar-foot{display:none}.logo{font-size:0}.logo::after{content:"🎯";font-size:20px}.main{margin-left:64px}.cols-4,.cols-3,.cols-2{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">🎯 雅思备考工作台<small>IELTS 7.0+ · A 类 · 12 周</small></div>
+  <nav id="nav">
+    <a class="active" data-s="dashboard"><span class="ico">📊</span><span class="lbl">仪表盘</span></a>
+    <a data-s="plan"><span class="ico">📖</span><span class="lbl">学习计划</span></a>
+    <a data-s="checkin"><span class="ico">✅</span><span class="lbl">每日打卡</span></a>
+    <a data-s="vocab"><span class="ico">📚</span><span class="lbl">词汇</span></a>
+    <a data-s="speaking"><span class="ico">🎤</span><span class="lbl">口语题库</span></a>
+    <a data-s="writing"><span class="ico">✍️</span><span class="lbl">写作练习</span></a>
+    <a data-s="mock"><span class="ico">📝</span><span class="lbl">模考记录</span></a>
+    <a data-s="errors"><span class="ico">🧾</span><span class="lbl">错题本</span></a>
+  </nav>
+  <div class="sidebar-foot">数据自动保存在本浏览器（localStorage）</div>
+</aside>
+
+<main>
+  <!-- 仪表盘 -->
+  <section id="dashboard" class="active">
+    <div class="page-head"><h1>📊 学习仪表盘</h1><p>目标 7.0+ ｜ 听力 7.5 · 阅读 7.5 · 写作 6.5 · 口语 6.5 ｜ 每天 1–2 小时</p></div>
+    <div class="grid cols-4">
+      <div class="stat s-blue"><div class="num" id="st-days">0</div><div class="lbl">已打卡天数</div></div>
+      <div class="stat s-green"><div class="num" id="st-rate">0%</div><div class="lbl">平均完成率</div></div>
+      <div class="stat s-amber"><div class="num" id="st-time">0h</div><div class="lbl">累计学习时长</div></div>
+      <div class="stat s-teal"><div class="num" id="st-vocab">0</div><div class="lbl">累计词汇量</div></div>
+    </div>
+    <div class="grid cols-2 mt">
+      <div class="card"><h3>📈 模考成绩趋势</h3><div id="chart-mock"></div></div>
+      <div class="card"><h3>⏱ 每周学习时长（小时）</h3><div id="chart-time"></div></div>
+    </div>
+    <div class="card mt"><h3>🎯 最近一次模考</h3><div id="latest-mock" class="muted">还没记录模考，去「模考记录」填一次吧</div></div>
+  </section>
+
+  <!-- 学习计划 -->
+  <section id="plan">
+    <div class="page-head"><h1>📖 雅思 7.0+ 学习计划</h1><p>学术类 A 类 · CET-4 基础 · 2–3 个月 · 每天 1–2 小时</p></div>
+    <div class="doc">
+      <div class="warn">⚠️ 现实提醒：CET-4 到 7.0+ 通常需要 400 小时以上投入，每天 1–2 小时属于偏挑战目标。本计划采用「高效拉分」策略——听力/阅读冲 7.5+，写作/口语稳 6.5，实际成绩可能落在 6.5–7.0 区间。</div>
+      <h2>一、你已拥有的备考资料</h2>
+      <ul>
+        <li>剑桥雅思真题 剑 14–19 —— 核心刷题 + 阶段末模考</li>
+        <li>雅思口语真经（刘洪波）—— Part1/2/3 逐话题开口练习</li>
+        <li>雅思写作真经（刘洪波）—— Task1/Task2 精写对照</li>
+        <li>补充（免费可选）：IELTS Liz、BBC 6 Minute English、雅思哥口语题库</li>
+      </ul>
+      <h2>二、三阶段总览（约 12 周）</h2>
+      <h3><span class="badge b-phase1">阶段一</span> 基础补强（第 1–3 周）</h3>
+      <ul>
+        <li>词汇：每天 30–50 词，3 周累计约 800–1000 高频词</li>
+        <li>语法：补「从句、时态、非谓语、被动、虚拟语气」五大高频点</li>
+        <li>听力：精听入门（真题 Section 1–2 为主）</li>
+        <li>阅读：长难句拆解 + 定位基础，每周精读 2 篇</li>
+        <li>口语：用《口语真经》过 Part1 基础话题，每天开口</li>
+        <li>写作：用《写作真经》补基础句型 + Task1 图表入门</li>
+      </ul>
+      <h3><span class="badge b-phase2">阶段二</span> 题型强化（第 4–8 周）</h3>
+      <ul>
+        <li>听力：填空/选择/地图/配对分题型刷真题 Section 1–4</li>
+        <li>阅读：判断/填空/匹配/选择/段落标题 + 平行阅读法，限时</li>
+        <li>写作：学《写作真经》Task2 框架，T1 六类图表各练 1–2 篇</li>
+        <li>口语：练《口语真经》Part2 串题 + Part3 观点拓展</li>
+      </ul>
+      <h3><span class="badge b-phase3">阶段三</span> 冲刺模考（第 9–12 周）</h3>
+      <ul>
+        <li>每周 1 次完整模考（真题 17–19 最新卷，严格计时）</li>
+        <li>写作：每周精写 2 篇（T1 + T2），对照范文修改</li>
+        <li>口语：全套模拟 + 高频题二次打磨</li>
+        <li>错题复盘：定位错误类型（同义替换/定位/拼写/语法）</li>
+      </ul>
+      <h2>三、每日节奏与每周轮换</h2>
+      <h3>每日 1–2 小时</h3>
+      <ul>
+        <li>词汇 30 分钟（新词 + 复习旧词）</li>
+        <li>主攻单项 45–60 分钟（按日轮换）</li>
+        <li>复盘 15 分钟（错题 + 生词 + 今日收获）</li>
+      </ul>
+      <h3>每周轮换</h3>
+      <ul>
+        <li>周一 听力 · 周二 阅读 · 周三 写作 · 周四 口语 · 周五 听力 · 周六 阅读+写作 · 周日 口语+复盘</li>
+      </ul>
+      <h2>四、四科策略</h2>
+      <h3>听力（目标 7.5+，拉分项）</h3>
+      <ul>
+        <li>精听四步：盲听做题 → 对答案 → 逐句听写 → 跟读</li>
+        <li>先 Section 1–2 抓准确度，再上 Section 3–4</li>
+        <li>重点：同义替换、数字/日期/地址听写、地图方位词</li>
+      </ul>
+      <h3>阅读（目标 7.5+，拉分项）</h3>
+      <ul>
+        <li>平行阅读法 + 定位（关键词/同义替换/顺序原则）</li>
+        <li>限时：每篇 20 分钟 → 逐步压到 15 分钟</li>
+        <li>重点：判断题（Not Given vs False）、段落标题、匹配题</li>
+      </ul>
+      <h3>写作（目标 6.5）—— 配套《雅思写作真经》</h3>
+      <ul>
+        <li>Task1：四段结构（概述→数据→对比→总结），六类图表逐个练</li>
+        <li>Task2：逻辑框架 + 高频观点库 + 模板句型</li>
+        <li>每周精写 2 篇 → 对照范文 → 背熟句型 → 修改定稿</li>
+      </ul>
+      <h3>口语（目标 6.5）—— 配套《雅思口语真经》</h3>
+      <ul>
+        <li>Part1 逐个过 · Part2 串题（一个故事套多题）· Part3 观点拓展</li>
+        <li>每天开口 + 录音自评 + 对照参考答案</li>
+      </ul>
+      <h2>五、里程碑</h2>
+      <ul>
+        <li>起始（第 0 周）：预估 5.5–6.0，做一套模考定起点</li>
+        <li>阶段一末（第 3 周）：6.0 · 阶段二末（第 8 周）：6.5 · 阶段三末（第 12 周）：6.5–7.0</li>
+      </ul>
+      <h2>六、升级路径（若可增至 3 小时/天）</h2>
+      <ul>
+        <li>词汇 45 分钟 + 话题词 · 主攻 2 小时一天两科 · 每天 +30 分钟口语 +30 分钟泛听 · 每周模考 2 次</li>
+      </ul>
+      <div class="tip">💡 计划看这里，执行去「每日打卡」——每天勾选完成项即可，数据会自动汇总到仪表盘。</div>
+    </div>
+  </section>
+
+  <!-- 每日打卡 -->
+  <section id="checkin">
+    <div class="page-head"><h1>✅ 每日打卡</h1><p>完成某科就打勾，可填时长与备注，自动保存</p></div>
+    <div class="card">
+      <div class="row">
+        <select id="chk-week" onchange="renderCheckin()"></select>
+        <span class="muted" id="chk-sum"></span>
+      </div>
+      <div class="table-wrap mt"><table>
+        <thead><tr><th>日期</th><th>星期</th><th>周次</th><th>阶段</th><th>今日主攻</th><th>听力</th><th>阅读</th><th>写作</th><th>口语</th><th>词汇</th><th>时长(h)</th><th>备注</th></tr></thead>
+        <tbody id="chk-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- 词汇 -->
+  <section id="vocab">
+    <div class="page-head"><h1>📚 词汇打卡</h1><p>记录每日新词与复习量，累计自动统计</p></div>
+    <div class="card">
+      <div class="row"><span class="muted">💡 建议按艾宾浩斯曲线：新词在第 1 / 2 / 4 / 7 / 15 天复习</span></div>
+      <div class="table-wrap mt"><table>
+        <thead><tr><th>日期</th><th>新词数</th><th>复习词数</th><th>累计词汇</th><th>来源/主题</th></tr></thead>
+        <tbody id="vocab-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- 口语题库 -->
+  <section id="speaking">
+    <div class="page-head"><h1>🎤 口语题库</h1><p>按《雅思口语真经》逐话题练习，熟练度 1–5</p></div>
+    <div class="card"><div class="table-wrap" style="max-height:640px"><table>
+      <thead><tr><th>Part</th><th>话题 / 题目</th><th>熟练度(1-5)</th><th>已录音</th><th>已完成</th><th>备注</th></tr></thead>
+      <tbody id="speaking-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- 写作练习 -->
+  <section id="writing">
+    <div class="page-head"><h1>✍️ 写作练习</h1><p>按《雅思写作真经》逐题精写，对照范文后打勾</p></div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Task</th><th>题目 / 话题</th><th>类型/图表</th><th>日期</th><th>字数</th><th>自评(分)</th><th>已对照范文</th><th>修改完成</th><th>备注</th></tr></thead>
+      <tbody id="writing-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- 模考记录 -->
+  <section id="mock">
+    <div class="page-head"><h1>📝 模考记录</h1><p>填四科分数，总分自动按雅思规则四舍五入到 0.5</p></div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>日期(周末)</th><th>听力</th><th>阅读</th><th>写作</th><th>口语</th><th>总分</th><th>与目标差距</th><th>复盘要点</th></tr></thead>
+      <tbody id="mock-body"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- 错题本 -->
+  <section id="errors">
+    <div class="page-head"><h1>🧾 错题本</h1><p>记录错题与错因，复盘后打勾</p></div>
+    <div class="card">
+      <div class="row">
+        <select id="err-subject"><option>听力</option><option>阅读</option><option>写作</option><option>口语</option></select>
+        <input id="err-type" type="text" placeholder="题型（如 判断题）">
+        <input id="err-source" type="text" placeholder="来源（如 剑18 Test2）">
+        <select id="err-cause"><option>同义替换没识别</option><option>定位错误</option><option>拼写错误</option><option>语法错误</option><option>词汇不足</option><option>理解偏差</option><option>粗心</option></select>
+        <button class="btn" onclick="addError()">＋ 添加</button>
+      </div>
+      <div class="table-wrap mt"><table>
+        <thead><tr><th>日期</th><th>科目</th><th>题型</th><th>来源</th><th>错因</th><th>正确思路</th><th>已复盘</th><th></th></tr></thead>
+        <tbody id="err-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const LS_KEY = 'ielts_workspace_v1';
+const START = new Date(2026, 10, 30); // 2026-11-30 周一
+const DAYS = 84, WEEKS = 12;
+const WKC = ['周日','周一','周二','周三','周四','周五','周六'];
+const ROT = ['口语+复盘：错题复盘 + 下周计划','听力：真题精听 + 题型','阅读：精读/限时 + 定位','写作：写作真经 T1/T2 精写','口语：口语真经 P1/P2 话题','听力：真题精听 + 题型','阅读+写作：半套真题 + 修改'];
+const SUBJECTS = ['听力','阅读','写作','口语'];
+const SPEAKING_TOPICS = [["P1","家乡 / 居住的城市"],["P1","学习 / 工作"],["P1","兴趣爱好"],["P1","家庭与朋友"],["P1","食物与餐厅"],["P1","旅行与假期"],["P1","运动与健康"],["P1","音乐 / 电影"],["P1","天气与季节"],["P2","敬佩的人"],["P2","难忘的旅行"],["P2","喜欢的书 / 电影"],["P2","收到的礼物"],["P2","想学的新技能"],["P2","喜欢的房间 / 地点"],["P3","教育话题"],["P3","科技的影响"],["P3","环境问题"],["P3","社会与文化变化"]];
+const WRITING_TASKS = [["T1","线图","线图"],["T1","柱状图","柱状图"],["T1","饼图","饼图"],["T1","表格","表格"],["T1","流程图","流程图"],["T1","地图","地图"],["T2","教育","议论文"],["T2","科技","议论文"],["T2","环境","议论文"],["T2","社会 / 城市","议论文"],["T2","媒体 / 广告","议论文"],["T2","健康 / 生活方式","议论文"]];
+
+function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dayAt(i){const d=new Date(START);d.setDate(d.getDate()+i);return d;}
+function weekOf(i){return Math.floor(i/7)+1;}
+function phaseOf(w){return w<=3?'阶段一：基础补强':(w<=8?'阶段二：题型强化':'阶段三：冲刺模考');}
+function phaseCls(p){return p.includes('一')?'b-phase1':(p.includes('二')?'b-phase2':'b-phase3');}
+
+// ---- 状态 ----
+let state = load();
+function load(){
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw) return Object.assign({checkin:{},vocab:{},speaking:{},writing:{},mock:{},errors:[]}, JSON.parse(raw)); }catch(e){}
+  return {checkin:{},vocab:{},speaking:{},writing:{},mock:{},errors:[]};
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function g(obj,key,def){ return obj && obj[key]!==undefined ? obj[key] : def; }
+
+// ---- 导航 ----
+document.getElementById('nav').addEventListener('click', e=>{
+  const a = e.target.closest('a'); if(!a) return;
+  document.querySelectorAll('#nav a').forEach(x=>x.classList.remove('active'));
+  a.classList.add('active');
+  document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(a.dataset.s).classList.add('active');
+  renderAll();
+});
+
+// ---- 日期选择器（打卡/词汇的周筛选）----
+function fillWeekSelect(){
+  const sel = document.getElementById('chk-week');
+  const cur = Math.floor((Date.now()-START.getTime())/(86400000));
+  let html = '<option value="all">全部 84 天</option>';
+  for(let w=1;w<=WEEKS;w++){ html += '<option value="'+w+'">第 '+w+' 周'+(w===cur? '（当前）':'')+'</option>'; }
+  sel.innerHTML = html;
+}
+
+// ---- 每日打卡 ----
+function renderCheckin(){
+  fillWeekSelect();
+  const sel = document.getElementById('chk-week').value;
+  const tbody = document.getElementById('chk-body');
+  let rows = '', shown=0, done=0, total=0;
+  for(let i=0;i<DAYS;i++){
+    const w = weekOf(i);
+    if(sel!=='all' && String(w)!==sel) continue;
+    const d = dayAt(i), key = fmtDate(d);
+    const c = state.checkin[key] || {};
+    const checks = ['听力','阅读','写作','口语','词汇'].map(s=>{
+      const on = c[s]? 'checked':'';
+      if(on) done++;
+      total++;
+      return '<td><input type="checkbox" data-k="'+key+'" data-f="'+s+'" '+on+' onchange="setCheck(this)"></td>';
+    }).join('');
+    rows += '<tr><td>'+key+'</td><td>'+WKC[d.getDay()]+'</td><td>'+w+'</td>'+
+      '<td><span class="badge '+phaseCls(phaseOf(w))+'">'+phaseOf(w)+'</span></td>'+
+      '<td style="text-align:left">'+ROT[d.getDay()]+'</td>'+checks+
+      '<td><input type="number" step="0.5" min="0" value="'+(c.time||'')+'" style="width:64px" data-k="'+key+'" data-f="time" onchange="setNum(this)"></td>'+
+      '<td><input type="text" value="'+(c.note||'')+'" style="width:120px" data-k="'+key+'" data-f="note" onchange="setTxt(this)"></td></tr>';
+    shown++;
+  }
+  tbody.innerHTML = rows;
+  document.getElementById('chk-sum').textContent = '本视图 '+shown+' 天 · 已完成 '+done+'/'+total+' 项（'+Math.round(done/total*100)+'%）';
+}
+function setCheck(el){
+  const key=el.dataset.k, f=el.dataset.f;
+  state.checkin[key] = state.checkin[key]||{};
+  state.checkin[key][f] = el.checked?1:0;
+  save(); renderCheckin();
+}
+function setNum(el){
+  const key=el.dataset.k, f=el.dataset.f;
+  state.checkin[key] = state.checkin[key]||{};
+  state.checkin[key][f] = el.value===''? null : parseFloat(el.value);
+  save();
+}
+function setTxt(el){
+  const key=el.dataset.k, f=el.dataset.f;
+  state.checkin[key] = state.checkin[key]||{};
+  state.checkin[key][f] = el.value; save();
+}
+
+// ---- 词汇 ----
+function renderVocab(){
+  const tbody = document.getElementById('vocab-body');
+  let rows='', cum=0;
+  for(let i=0;i<DAYS;i++){
+    const d=dayAt(i), key=fmtDate(d);
+    const v = state.vocab[key]||{};
+    cum += (v.n||0);
+    rows += '<tr><td>'+key+'</td>'+
+      '<td><input type="number" min="0" value="'+(v.n||'')+'" style="width:70px" data-k="'+key+'" data-f="n" onchange="setV(this)"></td>'+
+      '<td><input type="number" min="0" value="'+(v.r||'')+'" style="width:70px" data-k="'+key+'" data-f="r" onchange="setV(this)"></td>'+
+      '<td><b>'+cum+'</b></td>'+
+      '<td><input type="text" value="'+(v.src||'')+'" style="width:170px" data-k="'+key+'" data-f="src" onchange="setV(this)"></td></tr>';
+  }
+  tbody.innerHTML = rows;
+}
+function setV(el){
+  const key=el.dataset.k, f=el.dataset.f;
+  state.vocab[key]=state.vocab[key]||{};
+  state.vocab[key][f] = (f==='src')? el.value : (el.value===''?null:parseInt(el.value));
+  save(); renderVocab();
+}
+
+// ---- 口语题库 ----
+function renderSpeaking(){
+  const tbody = document.getElementById('speaking-body');
+  let rows='';
+  SPEAKING_TOPICS.forEach((t,i)=>{
+    const id='s'+i; const v=state.speaking[id]||{};
+    rows += '<tr><td><span class="badge '+(t[0]==='P1'?'b-l':(t[0]==='P2'?'b-r':'b-w'))+'">'+t[0]+'</span></td>'+
+      '<td style="text-align:left">'+t[1]+'</td>'+
+      '<td><select data-id="'+id+'" data-f="lv" onchange="setS(this)">'+[1,2,3,4,5].map(n=>'<option value="'+n+'"'+(g(v,'lv',3)==n?' selected':'')+'>'+n+'</option>').join('')+'</select></td>'+
+      '<td><input type="checkbox" '+(v.rec?'checked':'')+' data-id="'+id+'" data-f="rec" onchange="setS(this)"></td>'+
+      '<td><input type="checkbox" '+(v.done?'checked':'')+' data-id="'+id+'" data-f="done" onchange="setS(this)"></td>'+
+      '<td><input type="text" value="'+(v.note||'')+'" style="width:120px" data-id="'+id+'" data-f="note" onchange="setS(this)"></td></tr>';
+  });
+  tbody.innerHTML = rows;
+}
+function setS(el){
+  const id=el.dataset.id, f=el.dataset.f;
+  state.speaking[id]=state.speaking[id]||{};
+  state.speaking[id][f] = (f==='lv')?parseInt(el.value):(el.type==='checkbox'?el.checked:el.value);
+  save();
+}
+
+// ---- 写作练习 ----
+function renderWriting(){
+  const tbody = document.getElementById('writing-body');
+  let rows='';
+  WRITING_TASKS.forEach((t,i)=>{
+    const id='w'+i; const v=state.writing[id]||{};
+    rows += '<tr><td><span class="badge '+(t[0]==='T1'?'b-l':'b-w')+'">'+t[0]+'</span></td>'+
+      '<td style="text-align:left">'+t[1]+'</td><td>'+t[2]+'</td>'+
+      '<td><input type="date" value="'+(v.date||'')+'" data-id="'+id+'" data-f="date" onchange="setW(this)"></td>'+
+      '<td><input type="number" min="0" value="'+(v.words||'')+'" style="width:64px" data-id="'+id+'" data-f="words" onchange="setW(this)"></td>'+
+      '<td><input type="number" step="0.5" min="0" max="9" value="'+(v.score||'')+'" style="width:60px" data-id="'+id+'" data-f="score" onchange="setW(this)"></td>'+
+      '<td><input type="checkbox" '+(v.chk?'checked':'')+' data-id="'+id+'" data-f="chk" onchange="setW(this)"></td>'+
+      '<td><input type="checkbox" '+(v.rev?'checked':'')+' data-id="'+id+'" data-f="rev" onchange="setW(this)"></td>'+
+      '<td><input type="text" value="'+(v.note||'')+'" style="width:110px" data-id="'+id+'" data-f="note" onchange="setW(this)"></td></tr>';
+  });
+  tbody.innerHTML = rows;
+}
+function setW(el){
+  const id=el.dataset.id, f=el.dataset.f;
+  state.writing[id]=state.writing[id]||{};
+  let val = el.type==='checkbox'?el.checked:(el.value===''?null:(f==='score'?parseFloat(el.value):(f==='words'?parseInt(el.value):el.value)));
+  state.writing[id][f]=val; save();
+}
+
+// ---- 模考记录 ----
+function roundHalf(x){ return Math.round(x*2)/2; }
+function renderMock(){
+  const tbody = document.getElementById('mock-body');
+  let rows='';
+  for(let w=1;w<=WEEKS;w++){
+    const d=new Date(START); d.setDate(d.getDate()+w*7-1);
+    const key='m'+w; const v=state.mock[key]||{};
+    const sc=['听力','阅读','写作','口语'].map((s,i)=>{
+      const k=['l','r','w','s'][i];
+      return '<td><input type="number" step="0.5" min="0" max="9" value="'+(v[k]||'')+'" style="width:58px" data-m="'+key+'" data-f="'+k+'" onchange="setM(this)"></td>';
+    }).join('');
+    const all = ['l','r','w','s'].every(k=>v[k]);
+    const total = all? roundHalf((v.l+v.r+v.w+v.s)/4) : '';
+    const gap = total===''? '' : (total-7).toFixed(1);
+    rows += '<tr><td>'+fmtDate(d)+'</td>'+sc+'<td><b>'+(total||'—')+'</b></td>'+
+      '<td style="color:'+(gap>=0?'#16a34a':'#dc2626')+'">'+(gap===''?'':(gap>0?'+':'')+gap)+'</td>'+
+      '<td><input type="text" value="'+(v.note||'')+'" style="width:200px" data-m="'+key+'" data-f="note" onchange="setM(this)"></td></tr>';
+  }
+  tbody.innerHTML = rows;
+}
+function setM(el){
+  const m=el.dataset.m, f=el.dataset.f;
+  state.mock[m]=state.mock[m]||{};
+  state.mock[m][f]= (f==='note')? el.value : (el.value===''?null:parseFloat(el.value));
+  save(); renderMock();
+}
+
+// ---- 错题本 ----
+function addError(){
+  state.errors.push({d:fmtDate(new Date()), s:document.getElementById('err-subject').value, t:document.getElementById('err-type').value, src:document.getElementById('err-source').value, c:document.getElementById('err-cause').value, idea:'', done:0});
+  document.getElementById('err-type').value=''; document.getElementById('err-source').value='';
+  save(); renderErrors();
+}
+function renderErrors(){
+  const tbody = document.getElementById('err-body');
+  tbody.innerHTML = state.errors.map((e,i)=>{
+    return '<tr><td>'+e.d+'</td><td><span class="badge '+(e.s==='听力'?'b-l':e.s==='阅读'?'b-r':e.s==='写作'?'b-w':'b-s')+'">'+e.s+'</span></td>'+
+    '<td>'+e.t+'</td><td>'+e.src+'</td><td>'+e.c+'</td>'+
+    '<td><input type="text" value="'+(e.idea||'')+'" style="width:180px" onchange="state.errors['+i+'].idea=this.value;save()"></td>'+
+    '<td><input type="checkbox" '+(e.done?'checked':'')+' onchange="state.errors['+i+'].done=this.checked?1:0;save()"></td>'+
+    '<td><button class="btn btn-ghost" onclick="delError('+i+')">删</button></td></tr>';
+  }).join('');
+}
+function delError(i){ state.errors.splice(i,1); save(); renderErrors(); }
+
+// ---- 仪表盘 ----
+function renderDashboard(){
+  // 打卡统计
+  let days=0, done=0, total=0, time=0;
+  for(const k in state.checkin){ const c=state.checkin[k];
+    const d = ['听力','阅读','写作','口语','词汇'].filter(s=>c[s]).length;
+    if(d>0) days++; done+=d; total+=5; time += (c.time||0);
+  }
+  // 词汇累计
+  let vocab=0; for(const k in state.vocab) vocab += (state.vocab[k].n||0);
+  document.getElementById('st-days').textContent = days;
+  document.getElementById('st-rate').textContent = total? Math.round(done/total*100)+'%' : '0%';
+  document.getElementById('st-time').textContent = time+'h';
+  document.getElementById('st-vocab').textContent = vocab;
+  // 最近模考
+  let latest=null;
+  for(let w=1;w<=WEEKS;w++){ const v=state.mock['m'+w]||{}; if(['l','r','w','s'].every(k=>v[k])) latest={w,v}; }
+  const lm = document.getElementById('latest-mock');
+  if(latest){ const t=roundHalf((latest.v.l+latest.v.r+latest.v.w+latest.v.s)/4);
+    lm.innerHTML = '第 '+latest.w+' 周模考：<b style="font-size:20px;color:#4361ee">'+t+'</b> 分 ｜ 听力 '+latest.v.l+' · 阅读 '+latest.v.r+' · 写作 '+latest.v.w+' · 口语 '+latest.v.s+' ｜ <span style="color:'+(t>=7?'#16a34a':'#dc2626')+'">距 7.0 '+(t>=7?'已达标':'还差 '+((7-t).toFixed(1))+' 分')+'</span>';
+  } else lm.textContent = '还没记录模考，去「模考记录」填一次吧';
+  // 图表
+  drawMockChart(); drawTimeChart();
+}
+
+function svgW(){ return Math.min(document.getElementById('chart-mock').clientWidth || 500, 500); }
+function drawMockChart(){
+  const box = document.getElementById('chart-mock');
+  const labels=[], vals=[];
+  for(let w=1;w<=WEEKS;w++){ const v=state.mock['m'+w]||{};
+    if(['l','r','w','s'].every(k=>v[k])){ labels.push(w); vals.push(roundHalf((v.l+v.r+v.w+v.s)/4)); }
+  }
+  const W=500,H=180,padL=34,padR=16,padT=16,padB=26;
+  const ymin=5, ymax=7.5;
+  let s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  for(let g=5;g<=7.5;g+=0.5){ const y=padT+(ymax-g)/(ymax-ymin)*(H-padT-padB);
+    s+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#eef1f6"/>';
+    s+='<text x="'+(padL-6)+'" y="'+(y+4)+'" font-size="10" fill="#9aa1b5" text-anchor="end">'+g.toFixed(1)+'</text>';
+  }
+  if(vals.length===0){ s+='<text x="'+(W/2)+'" y="'+(H/2)+'" font-size="13" fill="#9aa1b5" text-anchor="middle">填写模考分数后显示趋势</text>'; }
+  else if(vals.length===1){ const y=padT+(ymax-vals[0])/(ymax-ymin)*(H-padT-padB); const x=padL+(W-padL-padR)/2;
+    s+='<circle cx="'+x+'" cy="'+y+'" r="5" fill="#4361ee"/><text x="'+x+'" y="'+(y-8)+'" font-size="12" fill="#4361ee" text-anchor="middle">'+vals[0]+'</text>';
+  } else {
+    const xs=vals.map((v,i)=>padL+(W-padL-padR)*i/(vals.length-1));
+    const ys=vals.map(v=>padT+(ymax-v)/(ymax-ymin)*(H-padT-padB));
+    s+='<polyline points="'+xs.map((x,i)=>x+','+ys[i]).join(' ')+'" fill="none" stroke="#4361ee" stroke-width="2.5"/>';
+    xs.forEach((x,i)=>{ s+='<circle cx="'+x+'" cy="'+ys[i]+'" r="4.5" fill="#4361ee"/><text x="'+x+'" y="'+(ys[i]-8)+'" font-size="11" fill="#31406e" text-anchor="middle">'+vals[i]+'</text>'; });
+  }
+  s+='<text x="'+(W/2)+'" y="'+(H-6)+'" font-size="10" fill="#9aa1b5" text-anchor="middle">第 N 周模考</text>';
+  s+='</svg>'; box.innerHTML=s;
+}
+function drawTimeChart(){
+  const box = document.getElementById('chart-time');
+  const W=500,H=180,padL=34,padR=12,padT=14,padB=26;
+  const weeks=[]; for(let w=1;w<=WEEKS;w++) weeks.push(0);
+  for(const k in state.checkin){ const c=state.checkin[k]; if(!c.time) continue;
+    const dd=new Date(k+'T00:00:00'); const w=Math.floor((dd-START.getTime())/(7*86400000))+1; if(w>=1&&w<=WEEKS) weeks[w-1]+=c.time;
+  }
+  const max=Math.max(1,...weeks);
+  const bw=(W-padL-padR)/WEEKS;
+  let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  weeks.forEach((v,i)=>{
+    const h=(H-padT-padB)*v/max;
+    const x=padL+i*bw, y=padT+(H-padT-padB)-h;
+    s+='<rect x="'+(x+3)+'" y="'+y+'" width="'+(bw-6)+'" height="'+Math.max(h, v>0?2:0)+'" rx="4" fill="'+['#22c55e','#22c55e','#22c55e','#3b82f6','#3b82f6','#3b82f6','#3b82f6','#3b82f6','#f59e0b','#f59e0b','#f59e0b','#f59e0b'][i]+'"/>';
+    if(v>0) s+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" font-size="9" fill="#7a8199" text-anchor="middle">'+v.toFixed(1)+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(H-8)+'" font-size="9" fill="#9aa1b5" text-anchor="middle">'+(i+1)+'</text>';
+  });
+  s+='</svg>'; box.innerHTML=s;
+}
+
+// ---- 初始化 ----
+function renderAll(){ renderCheckin(); renderVocab(); renderSpeaking(); renderWriting(); renderMock(); renderErrors(); renderDashboard(); }
+renderAll();
+</script>
+</body>
+</html>
